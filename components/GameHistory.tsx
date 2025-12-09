@@ -1,14 +1,22 @@
-import React from 'react';
-import { GameRecord } from '../types';
+import React, { useMemo } from 'react';
+import { GameRecord, DifficultyLevel } from '../types';
 import { Clock, Trophy, XCircle, Trash2 } from 'lucide-react';
 
 interface GameHistoryProps {
   records: GameRecord[];
   clearHistory: () => void;
   embedded?: boolean; // If true, removes outer card styles for embedding in mobile drawer
+  currentDifficulty: DifficultyLevel;
 }
 
-const GameHistory: React.FC<GameHistoryProps> = ({ records, clearHistory, embedded = false }) => {
+const GameHistory: React.FC<GameHistoryProps> = ({ records, clearHistory, embedded = false, currentDifficulty }) => {
+  
+  const bestRecord = useMemo(() => {
+    return records
+      .filter(r => r.result === '胜利' && r.difficulty === currentDifficulty)
+      .sort((a, b) => a.time - b.time)[0];
+  }, [records, currentDifficulty]);
+
   // Common content rendering
   const content = (
     <div className="flex flex-col h-full">
@@ -28,17 +36,37 @@ const GameHistory: React.FC<GameHistoryProps> = ({ records, clearHistory, embedd
         </div>
       )}
 
-      {embedded && (
-         <div className="absolute top-2 right-2 z-10">
-            <button 
-            onClick={clearHistory}
-            className="text-slate-500 hover:text-rose-400 transition-colors p-2 bg-slate-800 rounded-full"
-            title="清除记录"
-          >
-            <Trash2 className="w-3 h-3" />
-          </button>
+      {/* Best Time Banner */}
+      <div className={`px-4 py-3 border-b border-slate-700/50 flex items-center justify-between shrink-0 ${embedded ? 'bg-slate-900/50' : 'bg-slate-800/30'}`}>
+         <div className="flex flex-col">
+            <span className="text-[10px] uppercase text-slate-500 font-bold tracking-wider mb-0.5 flex items-center gap-1">
+               <Trophy className="w-3 h-3 text-yellow-500/80" />
+               {currentDifficulty}最佳
+            </span>
+            <div className="flex items-baseline gap-2">
+               <span className={`text-xl font-mono font-bold ${bestRecord ? 'text-yellow-400' : 'text-slate-600'}`}>
+                  {bestRecord ? bestRecord.time : '--'}
+                  <span className="text-xs text-slate-600 ml-0.5">s</span>
+               </span>
+               {bestRecord && (
+                  <span className="text-[10px] text-slate-500/60 font-mono">
+                     {bestRecord.date.split(' ')[0]}
+                  </span>
+               )}
+            </div>
          </div>
-      )}
+
+         {/* Embedded Delete Button (moved here for mobile layout) */}
+         {embedded && (
+            <button 
+              onClick={clearHistory}
+              className="text-slate-500 hover:text-rose-400 transition-colors p-2 bg-slate-800 rounded-lg border border-slate-700 shadow-sm"
+              title="清除记录"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+         )}
+      </div>
       
       {records.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-slate-600 p-8 text-sm">

@@ -48,7 +48,7 @@ const App: React.FC = () => {
     };
     
     setHistory(prev => {
-      const newHistory = [newRecord, ...prev].slice(0, 50); // Keep last 50 games
+      const newHistory = [newRecord, ...prev].slice(0, 20); // Keep last 20 games
       localStorage.setItem('minesweeper_history', JSON.stringify(newHistory));
       return newHistory;
     });
@@ -143,7 +143,11 @@ const App: React.FC = () => {
              <div className="flex justify-center w-full">
                <Timer time={time} />
              </div>
-             <GameHistory records={history} clearHistory={clearHistory} />
+             <GameHistory 
+                records={history} 
+                clearHistory={clearHistory} 
+                currentDifficulty={difficulty}
+             />
         </div>
       </aside>
 
@@ -217,7 +221,12 @@ const App: React.FC = () => {
          
          {/* Content */}
          <div className="flex-1 overflow-hidden bg-slate-900 w-full relative">
-            <GameHistory records={history} clearHistory={clearHistory} embedded={true} />
+            <GameHistory 
+                records={history} 
+                clearHistory={clearHistory} 
+                embedded={true} 
+                currentDifficulty={difficulty}
+            />
          </div>
       </div>
 
